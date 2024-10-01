@@ -6,13 +6,19 @@ const https = require('https');
 const url = 'https://newsapi.org/v2/top-headlines?sources=google-news-br&apiKey=d7a84374023c4d55991de13dba98f20f';
 
 const formatDateToMSX = (date) => {
-    const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'America/Sao_Paulo' };
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit', 
+                      hour: '2-digit', minute: '2-digit', second: '2-digit', 
+                      hour12: false, timeZone: 'America/Sao_Paulo' };
     return new Date(date).toLocaleString('pt-BR', options).replace(',', '');
 };
 
 const wrapText = (text, maxLength) => {
     const regex = new RegExp(`(.{1,${maxLength}})`, 'g');
     return text.match(regex).join('\n');
+};
+
+const removeAccents = (text) => {
+    return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ç/g, 'c').replace(/Ç/g, 'C');
 };
 
 app.get('/news', (req, res) => {
@@ -37,9 +43,10 @@ app.get('/news', (req, res) => {
             // Limitação de 40 colunas por linha
             const maxLength = 40;
         
-            const author = wrapText(`Autor: ${article.author}`, maxLength);
-            const title = wrapText(`Título: ${article.title}`, maxLength);
-            const publishedAt = wrapText(`Publicado em: ${formattedDate}`, maxLength);
+            // Remove acentos e cedilha
+            const author = wrapText(removeAccents(`Autor: ${article.author}`), maxLength);
+            const title = wrapText(removeAccents(`Titulo: ${article.title}`), maxLength);
+            const publishedAt = wrapText(removeAccents(`Publicado em: ${formattedDate}`), maxLength);
         
             return `${author}\n\n${title}\n\n${publishedAt}\n\n---------------------------------`;
         }).join('\n\n');
