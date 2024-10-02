@@ -3,7 +3,8 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const https = require('https');
-const url = 'https://newsapi.org/v2/top-headlines?sources=google-news-br&apiKey=d7a84374023c4d55991de13dba98f20f';
+const apiKey = 'd7a84374023c4d55991de13dba98f20f';
+const notAvailable = 'N/A';
 
 const formatDateToMSX = (date) => {
     const options = { year: 'numeric', month: '2-digit', day: '2-digit', 
@@ -22,6 +23,9 @@ const removeAccents = (text) => {
 };
 
 app.get('/news', (req, res) => {
+    //const url = `https://newsapi.org/v2/everything?sources=google-news-br&from=${todayString}&sortBy=publishedAt&apiKey=${apiKey}`;
+    const url = `https://newsapi.org/v2/everything?q=Brasil&sortBy=publishedAt&apiKey=${apiKey}`;
+
     fetch(url, {
         method: 'GET',
         headers: {
@@ -36,16 +40,15 @@ app.get('/news', (req, res) => {
         return response.json();
     })
     .then(data => {
-        //let json = JSON.parse(data)
         const result = data.articles.map(article => {
             const formattedDate = formatDateToMSX(article.publishedAt);
-        
-            // Limitação de 40 colunas por linha
             const maxLength = 40;
+
+            let a = article.author ? article.author : notAvailable;
+            let t = article.title ? article.title : notAvailable;
         
-            // Remove acentos e cedilha
-            const author = wrapText(removeAccents(`Autor: ${article.author}`), maxLength);
-            const title = wrapText(removeAccents(`Titulo: ${article.title}`), maxLength);
+            const author = wrapText(removeAccents(`Autor: ${a}`), maxLength);
+            const title = wrapText(removeAccents(`Titulo: ${t}`), maxLength);
             const publishedAt = wrapText(removeAccents(`Publicado em: ${formattedDate}`), maxLength);
         
             return `${author}\n\n${title}\n\n${publishedAt}\n\n---------------------------------`;
@@ -54,7 +57,7 @@ app.get('/news', (req, res) => {
         res.send(result);
     })
     .catch(error => {
-        console.error('Erro:', error);
+        console.error('Error:', error);
     });
 });
 
