@@ -42,7 +42,7 @@ app.get('/news', (req, res) => {
     .then(data => {
         const result = data.articles.map(article => {
             const formattedDate = formatDateToMSX(article.publishedAt);
-            const maxLength = 40;
+            const maxLength = 80;
 
             let a = article.author ? article.author : notAvailable;
             let t = article.title ? article.title : notAvailable;
