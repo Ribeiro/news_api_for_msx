@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 
-const https = require('https');
 const apiKey = 'd7a84374023c4d55991de13dba98f20f';
 const notAvailable = 'N/A';
 
@@ -23,8 +22,10 @@ const removeAccents = (text) => {
 };
 
 app.get('/news', (req, res) => {
-    //const url = `https://newsapi.org/v2/everything?sources=google-news-br&from=${todayString}&sortBy=publishedAt&apiKey=${apiKey}`;
-    const url = `https://newsapi.org/v2/everything?q=Brasil&sortBy=publishedAt&apiKey=${apiKey}`;
+    const page = req.query.page || 1;
+    const pageSize = req.query.pageSize || 5;
+    
+    const url = `https://newsapi.org/v2/everything?q=Brasil&sortBy=publishedAt&page=${page}&pageSize=${pageSize}&apiKey=${apiKey}`;
 
     fetch(url, {
         method: 'GET',
@@ -58,6 +59,7 @@ app.get('/news', (req, res) => {
     })
     .catch(error => {
         console.error('Error:', error);
+        res.status(500).send('Erro ao buscar notícias.');
     });
 });
 
